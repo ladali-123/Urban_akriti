@@ -1,39 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 
-/**
- * ABOUT US — sticky navbar + split reveal section
- * ------------------------------------------------
- * Design tokens
- *  Ivory bg   : #FBF9F5
- *  Ink        : #14181F
- *  Deep navy  : #101826
- *  Bronze     : #B4894F   (accent)
- *  Slate      : #8A93A3   (secondary text)
- *
- * Fonts (add these to your index.html <head> or _document):
- *  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
- *
- * TAILWIND CONVERSION NOTES:
- *  - All custom `.animate-*` CSS classes (bounce-float, bounce-float-delayed,
- *    bubble-float, drift, drift-slow, drift-slower) have been removed and
- *    replaced with Tailwind's arbitrary-value `animate-[...]` utility, e.g.
- *    `animate-[bounce-float_3.5s_ease-in-out_infinite]`.
- *  - The only CSS left in the <style> tag is the raw `@keyframes` definitions
- *    themselves — Tailwind has no utility that can *author* a keyframe, it
- *    can only *reference* one by name, so this part can't be removed without
- *    a Tailwind config file (not available in this environment).
- *  - Per-bubble duration/delay still come through inline `style`, since those
- *    values are computed per-item in JS — inline styles simply override the
- *    class's default timing, same cascade behavior as before.
- *  - Layout, spacing, color and structure are untouched — pixel-for-pixel
- *    the same as the original.
- */
-
-/* ---------------------------------- */
-/*  Small hook: fade/slide an element  */
-/*  in once it enters the viewport     */
-/* ---------------------------------- */
 function useReveal(threshold = 0.2) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -57,9 +24,6 @@ function useReveal(threshold = 0.2) {
   return [ref, visible];
 }
 
-/* ---------------------------------- */
-/*               Navbar                */
-/* ---------------------------------- */
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -146,9 +110,7 @@ export function Navbar() {
   );
 }
 
-/* ---------------------------------- */
-/*          Ambient background         */
-/* ---------------------------------- */
+
 function AmbientBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -251,13 +213,71 @@ export default function AboutUs() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 md:gap-24 items-center">
-        {/* ---------- Image side ---------- */}
+        {/* ---------- Text side (now left) ---------- */}
         <div
-          ref={imgRef}
-          className={`relative transition-all duration-[1100ms] ease-out ${
-            imgVisible
+          ref={textRef}
+          className={`order-2 md:order-1 transition-all duration-[1100ms] ease-out delay-150 ${
+            textVisible
               ? "opacity-100 translate-x-0"
               : "opacity-0 -translate-x-12"
+          }`}
+        >
+          <h2 className="font-[Playfair_Display] text-3xl md:text-4xl leading-[1.15] text-[#3A1E1E]">
+            Deciphering opportunities,
+            <br />
+            building lasting trust.
+          </h2>
+
+          <div className="mt-8 space-y-5">
+            {paragraphs.map((p, i) => (
+              <p
+                key={i}
+                className={`font-[Inter] text-[#3a3f49] leading-relaxed transition-all duration-700
+                   ease-out text-lg text-justify${
+                  textVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4"
+                }`}
+                style={{ transitionDelay: `${300 + i * 150}ms` }}
+              >
+                {p}
+              </p>
+            ))}
+          </div>
+
+          {/* stats row */}
+          <div
+            ref={statsRef}
+            className="mt-14 grid grid-cols-3 gap-6 border-t border-[#14181F]/10 pt-4"
+          >
+            {stats.map((s, i) => (
+              <div
+                key={s.label}
+                className={`transition-all duration-700 ease-out ${
+                  statsVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4"
+                }`}
+                style={{ transitionDelay: `${i * 150}ms` }}
+              >
+                <p className="font-[Playfair_Display] text-3xl text-[#14181F]">
+                  {s.value}
+                </p>
+                <p className="font-[Inter] text-xs text-[#8A93A3] mt-1">
+                  {s.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ---------- Image side (now right) ---------- */}
+        <div
+          ref={imgRef}
+          className={`order-1 md:order-2 relative transition-all duration-[1100ms] ease-out ${
+            imgVisible
+              ? "opacity-100 translate-x-0"
+              : "opacity-0 translate-x-12"
           }`}
         >
           {/* bubbles sit behind/around the image, spanning a bit beyond its box */}
@@ -318,63 +338,6 @@ export default function AboutUs() {
               className="w-full h-full object-cover scale-[1.03] hover:scale-100 transition-transform duration-[1400ms] ease-out"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#101826]/30 via-transparent to-transparent" />
-          </div>
-        </div>
-
-        {/* ---------- Text side ---------- */}
-        <div
-          ref={textRef}
-          className={`transition-all duration-[1100ms] ease-out delay-150 ${
-            textVisible
-              ? "opacity-100 translate-x-0"
-              : "opacity-0 translate-x-12"
-          }`}
-        >
-          <h2 className="font-[Playfair_Display] text-3xl md:text-4xl leading-[1.15] text-[#3A1E1E]">
-            Deciphering opportunities,
-            <br />
-            building lasting trust.
-          </h2>
-
-          <div className="mt-8 space-y-5">
-            {paragraphs.map((p, i) => (
-              <p
-                key={i}
-                className={`font-[Inter] text-[#3a3f49] leading-relaxed transition-all duration-700 ease-out text-lg text-justify${
-                  textVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
-                }`}
-                style={{ transitionDelay: `${300 + i * 150}ms` }}
-              >
-                {p}
-              </p>
-            ))}
-          </div>
-
-          {/* stats row */}
-          <div
-            ref={statsRef}
-            className="mt-14 grid grid-cols-3 gap-6 border-t border-[#14181F]/10 pt-8"
-          >
-            {stats.map((s, i) => (
-              <div
-                key={s.label}
-                className={`transition-all duration-700 ease-out ${
-                  statsVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
-                }`}
-                style={{ transitionDelay: `${i * 150}ms` }}
-              >
-                <p className="font-[Playfair_Display] text-3xl text-[#14181F]">
-                  {s.value}
-                </p>
-                <p className="font-[Inter] text-xs text-[#8A93A3] mt-1">
-                  {s.label}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </div>
