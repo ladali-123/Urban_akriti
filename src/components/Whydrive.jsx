@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Silk from './Silk';
-import kitchenVideo from '../assets/kitchen.mp4';
+import kitchenVideo from '../assets/Kitchen.mp4';
 
 function Whychoose() {
   const [visible, setVisible] = useState(false);
