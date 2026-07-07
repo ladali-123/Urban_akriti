@@ -104,7 +104,8 @@ function FeatureBlock({ data, reversed }) {
   return (
     <div
       ref={ref}
-      className="relative w-full min-h-[480px] sm:min-h-[520px] md:min-h-[600px] bg-[#10171B] border-b-2 border-white"
+      className="relative w-full min-h-[480px] sm:min-h-[520px] md:min-h-[600px] bg-[#10171B] border-b-2
+       border-white"
     >
       {/* full-bleed background video for this section — overflow-hidden lives HERE,
           not on the outer wrapper, so the card is never clipped */}
@@ -169,8 +170,8 @@ export default function WhatWeDo() {
   return (
     <section className="w-full bg-white">
       {/* heading + intro */}
-      <div className="max-w-6xl mx-auto px-6 md:px-10 pt-20 pb-14">
-        <h2 className="text-5xl md:text-6xl font-bold text-[#10171B] mb-10">
+      <div className="max-w-6xl mx-auto px-6 md:px-10  pb-14">
+        <h2 className="text-4xl md:text-5xl font-bold text-[#10171B] mb-10">
           What we do?
         </h2>
         <div className="border-l-2 border-[#C79A56] pl-6 max-w-xl">

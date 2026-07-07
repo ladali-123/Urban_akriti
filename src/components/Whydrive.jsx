@@ -28,7 +28,10 @@ function Whychoose() {
   ];
 
   return (
-    <div ref={sectionRef} className="relative w-full min-h-[520px] overflow-hidden">
+    <div
+      ref={sectionRef}
+      className="relative w-full min-h-[520px] md:overflow-hidden overflow-visible pb-10 md:pb-0"
+    >
       {/* Background Silk layer */}
       <div className="absolute inset-0 z-0" style={{ bottom: '80px' }}>
         <Silk speed={5} scale={1} color="#7C8FA3" noiseIntensity={0.8} rotation={0} />
@@ -36,28 +39,26 @@ function Whychoose() {
 
       {/* Foreground content */}
       <div className="relative z-10 max-w-7xl mx-auto px-5 py-12">
-        <h2 className="text-white text-4xl md:text-5xl font-normal mb-14">
+        <h2 className="text-white text-3xl sm:text-4xl md:text-5xl font-normal mb-8 md:mb-14">
           What Drive us?
         </h2>
 
-        <div className="relative w-full" style={{ minHeight: '560px' }}>
+        {/* Mobile: simple stacked column. Desktop (md+): original absolute layout */}
+        <div className="relative w-full flex flex-col gap-6 md:block md:min-h-[560px]">
           <video
             src={kitchenVideo}
             autoPlay
             loop
             muted
             playsInline
-            className="absolute top-0 left-0 w-full max-w-[640px] h-[420px] object-cover rounded-tl-[60px] rounded-tr-xl rounded-bl-xl rounded-br-xl block"
+            className="w-full h-[260px] sm:h-[340px] rounded-tl-[60px] rounded-tr-xl rounded-bl-xl rounded-br-xl md:absolute md:top-0 md:left-0 md:w-full md:max-w-[640px] md:h-[420px] object-cover block"
           />
 
-          <div
-            className="absolute flex flex-col gap-7"
-            style={{ top: '190px', left: '50%', right: '0', width: 'auto' }}
-          >
+          <div className="flex flex-col gap-5 md:absolute md:gap-7 md:top-[190px] md:left-1/2 md:right-0 md:w-auto">
             {paragraphs.map((text, i) => (
               <p
                 key={i}
-                className={`text-white text-[17px] leading-relaxed m-0 transition-all duration-700 ease-out ${
+                className={`text-white text-[15px] sm:text-base md:text-[17px] leading-relaxed m-0 transition-all duration-700 ease-out ${
                   visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                 }`}
                 style={{ transitionDelay: `${i * 0.25}s` }}
@@ -69,8 +70,7 @@ function Whychoose() {
 
           <a
             href="#"
-            className="absolute inline-flex items-center gap-1.5 text-white underline font-semibold tracking-wider text-sm"
-            style={{ top: '460px', left: '0' }}
+            className="inline-flex items-center gap-1.5 text-white underline mb-6 font-semibold tracking-wider text-sm md:absolute md:top-[460px] md:left-0"
           >
             KNOW MORE ↗
           </a>
