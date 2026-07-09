@@ -2,52 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 // Path apne folder structure ke hisaab se check kar lena
 import pic1 from "../assets/pic1.png";
-import pic2 from "../assets/pic2.png";
-import pic3 from "../assets/pic3.png";
-import pic4 from "../assets/pic4.png";
 
-const images = [pic1, pic2, pic3, pic4];
-
-/* ---------- Scroll-reveal hook (fade-up on scroll, infiventures jaisa) ---------- */
-function useReveal(threshold = 0.25) {
-  const ref = useRef(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.unobserve(el);
-        }
-      },
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return [ref, inView];
-}
-
-function Reveal({ children, delay = 0, className = "" }) {
-  const [ref, inView] = useReveal();
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-[900ms] ease-out ${
-        inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-      } ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ---------- Line-mask reveal: har line neeche se maskke saath slide-up hoti hai (creative, agency-style) ---------- */
+/* ---------- Line-mask reveal: har line neeche se maskke saath slide-up hoti hai ---------- */
 function MaskLine({ children, delay = 0, loaded }) {
   return (
     <span className="block overflow-hidden">
@@ -63,143 +19,162 @@ function MaskLine({ children, delay = 0, loaded }) {
   );
 }
 
-export default function HomeHero() {
-  const [current, setCurrent] = useState(0);
-  const [loaded, setLoaded] = useState(false);
+/* ---------- Tiny gold mark, "infinity" logo jaisa but apna brand ke liye ---------- */
+function BrandMark() {
+  return (
+    <svg
+      width="26"
+      height="26"
+      viewBox="0 0 26 26"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="shrink-0"
+    >
+      <circle cx="9" cy="9" r="6.4" stroke="#d9b98a" strokeWidth="1.4" />
+      <circle cx="17" cy="9" r="6.4" stroke="#d9b98a" strokeWidth="1.4" />
+      <circle cx="13" cy="16.5" r="6.4" stroke="#d9b98a" strokeWidth="1.4" />
+    </svg>
+  );
+}
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % images.length);
-    }, 4500);
-    return () => clearInterval(interval);
-  }, []);
+export default function HomeHero() {
+  const [loaded, setLoaded] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const tickingRef = useRef(false);
 
   useEffect(() => {
     const t = setTimeout(() => setLoaded(true), 150);
     return () => clearTimeout(t);
   }, []);
 
+  // Scroll par nav + text upar ki taraf move + fade ho jaate hain (parallax exit)
+  useEffect(() => {
+    const onScroll = () => {
+      if (!tickingRef.current) {
+        tickingRef.current = true;
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          tickingRef.current = false;
+        });
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const heroTranslate = Math.min(scrollY * 0.5, 260); // upar move
+  const heroOpacity = Math.max(1 - scrollY / 420, 0); // fade out
+
   return (
-    <>
-      {/* ---------------- HERO ---------------- */}
-      <section className="relative h-[90vh] min-h-[620px] w-full overflow-hidden flex items-center justify-center text-center">
-        {images.map((src, i) => (
-          <img
-            key={src}
-            src={src}
-            alt={`Urban Kriti design ${i + 1}`}
-            className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[6000ms] ease-out ${
-              i === current ? "opacity-100 scale-105" : "opacity-0 scale-100"
-            }`}
-            style={{ transitionProperty: "opacity, transform", transitionDuration: "1500ms, 6000ms" }}
-          />
-        ))}
+    <section className="relative h-screen min-h-[640px] w-full overflow-hidden">
+      {/* ---------------- BACKGROUND IMAGE (static, pic1) ---------------- */}
+      <img
+        src={pic1}
+        alt="Urban Kriti interior design"
+        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[6000ms] ease-out ${
+          loaded ? "scale-105" : "scale-100"
+        }`}
+      />
+      {/* Halka dark overlay poori image pe — text hamesha readable rahega */}
+      <div className="absolute inset-0 bg-black/35" />
+      <div className="absolute bottom-0 left-0 right-0 h-[18%] bg-gradient-to-b from-transparent to-black/40" />
 
-        {/* Halka dark overlay poori image pe — chahe pic light ho ya dark, text/button hamesha readable rahega */}
-        <div className="absolute inset-0 bg-black/35" />
-
-        {/* Sirf bottom ka thoda sa hissa halka merge karta hai maroon me — baaki poori image clear rehti hai */}
-        <div className="absolute bottom-0 left-0 right-0 h-[18%] bg-gradient-to-b from-transparent to-[#3a1e1e]" />
-
-        {/* Text ab vertically centered hai, thoda upar (translate) taaki bottom marquee/gradient se overlap na ho */}
-        <div
-          className={`relative z-10 max-w-2xl mx-auto px-6 -translate-y-6 md:-translate-y-10 transition-opacity duration-700 ease-out ${
+      {/* ---------------- CONTENT (nav + hero text) — scroll par upar move + fade ---------------- */}
+      <div
+        className="relative z-10 flex h-full flex-col"
+        style={{
+          transform: `translateY(-${heroTranslate}px)`,
+          opacity: heroOpacity,
+        }}
+      >
+        {/* ---------------- NAVBAR ---------------- */}
+        <nav
+          className={`flex items-center justify-between px-6 md:px-12 pt-6 md:pt-8 transition-opacity duration-700 ${
             loaded ? "opacity-100" : "opacity-0"
           }`}
         >
-          <Reveal delay={0}>
-            <p className="uppercase tracking-[0.35em] text-[11px] md:text-xs text-[#d9b98a] mb-5 [text-shadow:0_1px_6px_rgba(0,0,0,0.6)]">
-              Architecture &amp; Interior Solutions
-            </p>
-          </Reveal>
+          <div className="flex items-center gap-2.5">
+            <BrandMark />
+            <span className="text-white font-sans font-semibold tracking-[0.3em] text-sm md:text-base">
+              URBAN KRITI
+            </span>
+          </div>
 
-          <h1 className="font-serif font-normal text-white text-[1.75rem] leading-[1.35] sm:text-4xl sm:leading-[1.3] md:text-[2.75rem] md:leading-[1.28] tracking-wide mb-8 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]">
-            <MaskLine delay={150} loaded={loaded}>
-              Designing spaces that reflect
-            </MaskLine>
-            <MaskLine delay={300} loaded={loaded}>
-              your dreams and elevate your lifestyle.
-            </MaskLine>
-          </h1>
+          <ul className="hidden md:flex items-center gap-9 text-[13px] tracking-[0.18em] uppercase text-white/90 font-sans">
+            <li>
+              <a href="#home" className="hover:text-[#d9b98a] transition-colors">
+                Home
+              </a>
+            </li>
+            <li>
+              <a href="#about" className="hover:text-[#d9b98a] transition-colors">
+                About
+              </a>
+            </li>
+            <li>
+              <a href="#services" className="hover:text-[#d9b98a] transition-colors">
+                Services
+              </a>
+            </li>
+            <li>
+              <a href="#projects" className="hover:text-[#d9b98a] transition-colors">
+                Projects
+              </a>
+            </li>
+            <li>
+              <a href="#contact" className="hover:text-[#d9b98a] transition-colors">
+                Contact
+              </a>
+            </li>
+          </ul>
 
-          <Reveal delay={550}>
-            <a
-              href="#contact"
-              className="group inline-flex items-center gap-2 border border-white/80 bg-black/10 backdrop-blur-[2px] text-white text-xs md:text-sm px-7 py-3 tracking-[0.18em] font-medium hover:bg-white hover:text-[#1c1c1c] transition-colors duration-300"
-            >
-              BOOK FREE CONSULTATION
-              <ArrowRight
-                size={16}
-                className="transition-transform duration-300 group-hover:translate-x-1"
-              />
-            </a>
-          </Reveal>
-        </div>
+          {/* Mobile: sirf brand ke saath ek simple CTA icon rakha, full menu chahiye toh drawer add kar lena */}
+          <a
+            href="#contact"
+            className="md:hidden text-white/90 text-[11px] tracking-[0.18em] uppercase border border-white/40 px-3 py-1.5"
+          >
+            Menu
+          </a>
+        </nav>
 
-        {/* Slide indicators */}
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-          {images.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              aria-label={`Slide ${i + 1}`}
-              className={`h-1.5 rounded-full transition-all duration-500 ${
-                i === current ? "w-8 bg-[#d9b98a]" : "w-3 bg-white/50"
+        {/* ---------------- HERO TEXT ---------------- */}
+        <div className="flex flex-1 items-center px-6 md:px-12">
+          <div className="max-w-3xl">
+            <h1 className="font-sans font-semibold text-white text-[2.6rem] leading-[1.05] sm:text-6xl sm:leading-[1.03] md:text-7xl md:leading-[1.02] lg:text-[5.5rem] tracking-tight [text-shadow:0_2px_16px_rgba(0,0,0,0.35)]">
+              <MaskLine delay={150} loaded={loaded}>
+                Inspired
+              </MaskLine>
+              <MaskLine delay={280} loaded={loaded}>
+                Design
+              </MaskLine>
+              <MaskLine delay={410} loaded={loaded}>
+                Timeless
+              </MaskLine>
+              <MaskLine delay={540} loaded={loaded}>
+                Living
+              </MaskLine>
+            </h1>
+
+            <div
+              className={`transition-all duration-700 ease-out ${
+                loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
               }`}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* ---------------- MARQUEE STRIP (halka scrolling strap, infiventures jaisa) ---------------- */}
-      <style>{`
-        @keyframes uk-marquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        .uk-marquee-track {
-          animation: uk-marquee 28s linear infinite;
-        }
-      `}</style>
-      <div className="relative z-10 bg-[#3a1e1e] border-y border-white/10 overflow-hidden py-2">
-        <div className="flex w-max uk-marquee-track">
-          {[0, 1].map((copy) => (
-            <div key={copy} className="flex items-center shrink-0">
-              {[
-                "ARCHITECTURE",
-                "INTERIOR DESIGN",
-                "RESIDENTIAL & COMMERCIAL",
-                "TURNKEY EXECUTION",
-                "MATERIAL & LIGHTING",
-              ].map((word) => (
-                <span
-                  key={word}
-                  className="flex items-center text-[#d9b98a]/80 text-xs md:text-sm tracking-[0.3em] 
-                  uppercase px-4 whitespace-nowrap"
-                >
-                  {word}
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#d9b98a]/50 ml-6" />
-                </span>
-              ))}
+              style={{ transitionDelay: "700ms" }}
+            >
+              <a
+                href="#contact"
+                className="group mt-9 inline-flex items-center gap-2 border border-white/80 bg-black/10 backdrop-blur-[2px] text-white text-xs md:text-sm px-7 py-3 tracking-[0.18em] font-medium hover:bg-white hover:text-[#1c1c1c] transition-colors duration-300"
+              >
+                BOOK FREE CONSULTATION
+                <ArrowRight
+                  size={16}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </a>
             </div>
-          ))}
+          </div>
         </div>
       </div>
-
-      {/* ---------------- DARK TEXT SECTION BELOW HERO ---------------- */}
-      <section className="bg-[#3a1e1e] pt-10 pb-12 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <Reveal>
-            <span className="block w-10 h-[2px] bg-[#d9b98a] mx-auto mb-5" />
-            <p className="text-lg md:text-2xl italic text-white/90 font-serif leading-relaxed max-w-3xl mx-auto">
-              "Giving spaces a deeper purpose through inspired design and
-              functional ingenuity — where every detail is considered, every
-              material has intention, and every corner tells a story worth
-              living in."
-            </p>
-          </Reveal>
-        </div>
-      </section>
-    </>
+    </section>
   );
 }
