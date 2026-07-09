@@ -1,180 +1,190 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight } from "lucide-react";
-// Path apne folder structure ke hisaab se check kar lena
+import { Linkedin, Instagram, Facebook } from "lucide-react";
 import pic1 from "../assets/pic1.png";
 
-/* ---------- Line-mask reveal: har line neeche se maskke saath slide-up hoti hai ---------- */
+/* ---------- Line Reveal ---------- */
 function MaskLine({ children, delay = 0, loaded }) {
-  return (
-    <span className="block overflow-hidden">
-      <span
-        className={`block transition-transform duration-[900ms] ease-out ${
-          loaded ? "translate-y-0" : "translate-y-full"
-        }`}
-        style={{ transitionDelay: `${delay}ms` }}
-      >
-        {children}
-      </span>
-    </span>
-  );
+    return (
+        <span className="block overflow-hidden">
+            <span
+                className={`block transition-transform duration-[900ms] ease-out ${
+                    loaded ? "translate-y-0" : "translate-y-full"
+                }`}
+                style={{ transitionDelay: `${delay}ms` }}
+            >
+                {children}
+            </span>
+        </span>
+    );
 }
 
-/* ---------- Tiny gold mark, "infinity" logo jaisa but apna brand ke liye ---------- */
-function BrandMark() {
-  return (
-    <svg
-      width="26"
-      height="26"
-      viewBox="0 0 26 26"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0"
-    >
-      <circle cx="9" cy="9" r="6.4" stroke="#d9b98a" strokeWidth="1.4" />
-      <circle cx="17" cy="9" r="6.4" stroke="#d9b98a" strokeWidth="1.4" />
-      <circle cx="13" cy="16.5" r="6.4" stroke="#d9b98a" strokeWidth="1.4" />
-    </svg>
-  );
+/* ---------- Decorative Golden Infinity Rings (smaller & centered) ---------- */
+function GoldRings() {
+    const circles = Array.from({ length: 8 }, (_, i) => 22 + i * 16);
+    return (
+        <svg
+            viewBox="0 0 360 360"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] h-[260px] md:w-[340px] md:h-[340px] opacity-70 pointer-events-none select-none"
+        >
+            <g>
+                {circles.map((r, i) => (
+                    <circle
+                        key={`l-${i}`}
+                        cx="130"
+                        cy="180"
+                        r={r}
+                        fill="none"
+                        stroke="#D9A857"
+                        strokeWidth="1"
+                    />
+                ))}
+            </g>
+            <g>
+                {circles.map((r, i) => (
+                    <circle
+                        key={`r-${i}`}
+                        cx="230"
+                        cy="180"
+                        r={r}
+                        fill="none"
+                        stroke="#D9A857"
+                        strokeWidth="1"
+                    />
+                ))}
+            </g>
+        </svg>
+    );
 }
 
 export default function HomeHero() {
-  const [loaded, setLoaded] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-  const tickingRef = useRef(false);
+    const [loaded, setLoaded] = useState(false);
+    const [scrollY, setScrollY] = useState(0);
+    const tickingRef = useRef(false);
 
-  useEffect(() => {
-    const t = setTimeout(() => setLoaded(true), 150);
-    return () => clearTimeout(t);
-  }, []);
+    useEffect(() => {
+        const timer = setTimeout(() => setLoaded(true), 150);
+        return () => clearTimeout(timer);
+    }, []);
 
-  // Scroll par nav + text upar ki taraf move + fade ho jaate hain (parallax exit)
-  useEffect(() => {
-    const onScroll = () => {
-      if (!tickingRef.current) {
-        tickingRef.current = true;
-        requestAnimationFrame(() => {
-          setScrollY(window.scrollY);
-          tickingRef.current = false;
-        });
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    useEffect(() => {
+        const onScroll = () => {
+            if (!tickingRef.current) {
+                tickingRef.current = true;
+                requestAnimationFrame(() => {
+                    setScrollY(window.scrollY);
+                    tickingRef.current = false;
+                });
+            }
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
 
-  const heroTranslate = Math.min(scrollY * 0.5, 260); // upar move
-  const heroOpacity = Math.max(1 - scrollY / 420, 0); // fade out
+    const heroTranslate = Math.min(scrollY * 0.5, 260);
+    const heroOpacity = Math.max(1 - scrollY / 420, 0);
 
-  return (
-    <section className="relative h-screen min-h-[640px] w-full overflow-hidden">
-      {/* ---------------- BACKGROUND IMAGE (static, pic1) ---------------- */}
-      <img
-        src={pic1}
-        alt="Urban Kriti interior design"
-        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[6000ms] ease-out ${
-          loaded ? "scale-105" : "scale-100"
-        }`}
-      />
-      {/* Halka dark overlay poori image pe — text hamesha readable rahega */}
-      <div className="absolute inset-0 bg-black/35" />
-      <div className="absolute bottom-0 left-0 right-0 h-[18%] bg-gradient-to-b from-transparent to-black/40" />
+    /* ---------- Second content block reveal (scroll-linked) ---------- */
+    const revealStart = 250; // scroll px jahan se dikhna start hoga
+    const revealEnd = 650; // scroll px jahan tak fully visible ho jayega
+    const revealProgress = Math.min(
+        Math.max((scrollY - revealStart) / (revealEnd - revealStart), 0),
+        1
+    );
+    const secondOpacity = revealProgress;
+    const secondTranslate = (1 - revealProgress) * 40; // 40px se 0px
 
-      {/* ---------------- CONTENT (nav + hero text) — scroll par upar move + fade ---------------- */}
-      <div
-        className="relative z-10 flex h-full flex-col"
-        style={{
-          transform: `translateY(-${heroTranslate}px)`,
-          opacity: heroOpacity,
-        }}
-      >
-        {/* ---------------- NAVBAR ---------------- */}
-        <nav
-          className={`flex items-center justify-between px-6 md:px-12 pt-6 md:pt-8 transition-opacity duration-700 ${
-            loaded ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <div className="flex items-center gap-2.5">
-            <BrandMark />
-            <span className="text-white font-sans font-semibold tracking-[0.3em] text-sm md:text-base">
-              URBAN KRITI
-            </span>
-          </div>
+    return (
+        <section className="relative w-full h-[180vh] overflow-hidden">
+            {/* Background Image */}
+            <img
+                src={pic1}
+                alt="Infinity"
+                className={`absolute inset-0 w-full h-full object-cover object-center
+                   transition-transform 
+                    duration-[6000ms] ease-out ${
+                    loaded ? "scale-105" : "scale-100"
+                }`}
+            />
 
-          <ul className="hidden md:flex items-center gap-9 text-[13px] tracking-[0.18em] uppercase text-white/90 font-sans">
-            <li>
-              <a href="#home" className="hover:text-[#d9b98a] transition-colors">
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="#about" className="hover:text-[#d9b98a] transition-colors">
-                About
-              </a>
-            </li>
-            <li>
-              <a href="#services" className="hover:text-[#d9b98a] transition-colors">
-                Services
-              </a>
-            </li>
-            <li>
-              <a href="#projects" className="hover:text-[#d9b98a] transition-colors">
-                Projects
-              </a>
-            </li>
-            <li>
-              <a href="#contact" className="hover:text-[#d9b98a] transition-colors">
-                Contact
-              </a>
-            </li>
-          </ul>
+            {/* Dark overlay to make white text pop like in pic1 */}
+            <div className="absolute inset-0  z-0"></div>
 
-          {/* Mobile: sirf brand ke saath ek simple CTA icon rakha, full menu chahiye toh drawer add kar lena */}
-          <a
-            href="#contact"
-            className="md:hidden text-white/90 text-[11px] tracking-[0.18em] uppercase border border-white/40 px-3 py-1.5"
-          >
-            Menu
-          </a>
-        </nav>
+            {/* Decorative golden rings – centered & smaller */}
+            <GoldRings />
 
-        {/* ---------------- HERO TEXT ---------------- */}
-        <div className="flex flex-1 items-center px-6 md:px-12">
-          <div className="max-w-3xl">
-            <h1 className="font-sans font-semibold text-white text-[2.6rem] leading-[1.05] sm:text-6xl sm:leading-[1.03] md:text-7xl md:leading-[1.02] lg:text-[5.5rem] tracking-tight [text-shadow:0_2px_16px_rgba(0,0,0,0.35)]">
-              <MaskLine delay={150} loaded={loaded}>
-                Inspired
-              </MaskLine>
-              <MaskLine delay={280} loaded={loaded}>
-                Design
-              </MaskLine>
-              <MaskLine delay={410} loaded={loaded}>
-                Timeless
-              </MaskLine>
-              <MaskLine delay={540} loaded={loaded}>
-                Living
-              </MaskLine>
-            </h1>
-
+            {/* Hero Content – left padding, moved down */}
             <div
-              className={`transition-all duration-700 ease-out ${
-                loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-              }`}
-              style={{ transitionDelay: "700ms" }}
+                className="relative z-10 flex items-start h-full px-10 md:px-24 lg:px-36 pt-72 md:pt-80"
+                style={{
+                    transform: `translateY(-${heroTranslate}px)`,
+                    opacity: heroOpacity,
+                }}
             >
-              <a
-                href="#contact"
-                className="group mt-9 inline-flex items-center gap-2 border border-white/80 bg-black/10 backdrop-blur-[2px] text-white text-xs md:text-sm px-7 py-3 tracking-[0.18em] font-medium hover:bg-white hover:text-[#1c1c1c] transition-colors duration-300"
-              >
-                BOOK FREE CONSULTATION
-                <ArrowRight
-                  size={16}
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                />
-              </a>
+                <div className="max-w-4xl">
+                    <h1 className="font-sans font-medium not-italic text-white leading-[1.05] tracking-tight 
+                        text-[28px] sm:text-6xl md:text-7xl lg:text-[7rem]">
+                        <MaskLine delay={150} loaded={loaded}>
+                            Believable
+                        </MaskLine>
+                        <MaskLine delay={280} loaded={loaded}>
+                            Ethos
+                        </MaskLine>
+                        <MaskLine delay={410} loaded={loaded}>
+                            Unbelievable
+                        </MaskLine>
+                        <MaskLine delay={540} loaded={loaded}>
+                            Ambition
+                        </MaskLine>
+                    </h1>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+
+            {/* Second scroll-revealed section: text left + social icons right */}
+            <div
+                className="absolute z-20 top-[60vh] md:top-[65vh] left-0 w-full flex items-center justify-between px-10 md:px-24 lg:px-36"
+                style={{
+                    opacity: secondOpacity,
+                    transform: `translateY(${secondTranslate}px)`,
+                }}
+            >
+                {/* Left text */}
+                <div className="flex flex-col gap-1">
+                    <p className="text-white font-sans font-medium text-lg md:text-2xl lg:text-[1.75rem]">
+                        Deciphering Opportunities
+                    </p>
+                    <p className="text-white font-sans font-medium text-lg md:text-2xl lg:text-[1.75rem]">
+                        Fuelling Excellence
+                    </p>
+                    <p className="text-white font-sans font-medium text-lg md:text-2xl lg:text-[1.75rem]">
+                        Building Trust
+                    </p>
+                </div>
+
+                {/* Right social icons */}
+                <div className="hidden md:flex items-center gap-6">
+                    <a
+                        href="#"
+                        aria-label="LinkedIn"
+                        className="text-white hover:text-[#D9A857] transition-colors"
+                    >
+                        <Linkedin size={22} strokeWidth={1.5} />
+                    </a>
+                    <a
+                        href="#"
+                        aria-label="Instagram"
+                        className="text-white hover:text-[#D9A857] transition-colors"
+                    >
+                        <Instagram size={22} strokeWidth={1.5} />
+                    </a>
+                    <a
+                        href="#"
+                        aria-label="Facebook"
+                        className="text-white hover:text-[#D9A857] transition-colors"
+                    >
+                        <Facebook size={22} strokeWidth={1.5} />
+                    </a>
+                </div>
+            </div>
+        </section>
+    );
 }
