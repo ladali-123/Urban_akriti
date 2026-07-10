@@ -5,7 +5,7 @@ import Aboutus from './components/Aboutus'
 import Whychoose from './components/Whydrive'
 import What from './components/What'
 import Choose from './components/Choose'
-import Work from './components/Work'
+import Work from './components/work'
 import Review from './components/Review'
 function App() {
   return (
