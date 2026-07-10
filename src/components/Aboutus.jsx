@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
+import buildingImg from "../assets/buil.avif";
+import gradImg from "../assets/grad.avif";
 
 function useReveal(threshold = 0.2) {
   const ref = useRef(null);
@@ -110,68 +112,81 @@ export function Navbar() {
   );
 }
 
+/* ---------------------------------- */
+/*        Urbankriti Feature Card      */
+/* ---------------------------------- */
+function CityFeatureSection() {
+  const [buildingRef, buildingVisible] = useReveal(0.25);
+  const [cardRef, cardVisible] = useReveal(0.25);
+  const sectionRef = useRef(null);
+  const [offset, setOffset] = useState(0);
 
-function AmbientBackground() {
+  // Scroll-driven upward movement
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      // Calculate how much of the section has been scrolled past
+      const scrollProgress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (windowHeight + rect.height)));
+      // Move upward as scroll progresses (max 80px up)
+      const translateY = -scrollProgress * 80;
+      setOffset(translateY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full bg-[#B4894F]/10 blur-3xl motion-reduce:animate-none animate-[drift-slow_9s_ease-in-out_infinite]" />
-      <div className="absolute top-1/3 -right-32 w-[380px] h-[380px] rounded-full bg-[#101826]/[0.05] blur-3xl motion-reduce:animate-none animate-[drift-slower_11s_ease-in-out_infinite]" />
-      <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] rounded-full bg-[#B4894F]/[0.07] blur-3xl motion-reduce:animate-none animate-[drift_7s_ease-in-out_infinite]" />
-
-      {/* subtle diagonal crosshatch / diamond grid, tiled across the whole section */}
-      <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-        <defs>
-          <pattern
-            id="diamond-grid"
-            width="56"
-            height="56"
-            patternUnits="userSpaceOnUse"
-            patternTransform="rotate(45)"
+    <section
+      ref={sectionRef}
+      className="relative bg-white py-6 md:py-14 overflow-visible"
+      style={{ zIndex: 10 }}
+    >
+      <div className="max-w-6xl mx-auto px-6 md:px-10">
+        <div
+          className="relative w-full max-w-[620px] mx-auto md:mx-0 md:ml-auto transition-transform duration-100 ease-out"
+          style={{ transform: `translateY(${offset}px)` }}
+        >
+          {/* Gradient card */}
+          <div
+            ref={cardRef}
+            className={`relative z-20 w-full aspect-[16/10]
+              rounded-none rounded-tr-[80px] overflow-hidden
+              shadow-[0_30px_80px_-20px_rgba(20,24,31,0.35)]
+              transition-all duration-[1100ms] ease-out delay-150
+              ${cardVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-16"}`}
           >
-            <line x1="0" y1="0" x2="0" y2="56" stroke="#B4894F" strokeOpacity="0.1" strokeWidth="1" />
-            <line x1="0" y1="0" x2="56" y2="0" stroke="#B4894F" strokeOpacity="0.1" strokeWidth="1" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#diamond-grid)" />
-      </svg>
-    </div>
-  );
-}
+            <img
+              src={gradImg}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
 
-/* ---------------------------------- */
-/*   Bubbles floating around the img   */
-/* ---------------------------------- */
-function ImageBubbles() {
-  // spread bubbles all around the image, varying size/position/speed/delay
-  const bubbles = [
-    { size: 70, top: "-8%", left: "-10%", delay: "0s", dur: "7s", opacity: 0.14 },
-    { size: 40, top: "5%", left: "88%", delay: "0.8s", dur: "6s", opacity: 0.18 },
-    { size: 26, top: "40%", left: "-14%", delay: "1.4s", dur: "5.5s", opacity: 0.2 },
-    { size: 55, top: "78%", left: "92%", delay: "0.4s", dur: "8s", opacity: 0.15 },
-    { size: 18, top: "92%", left: "10%", delay: "2s", dur: "5s", opacity: 0.22 },
-    { size: 34, top: "18%", left: "102%", delay: "1.1s", dur: "6.5s", opacity: 0.16 },
-    { size: 22, top: "60%", left: "-18%", delay: "0.2s", dur: "7.5s", opacity: 0.2 },
-    { size: 48, top: "-12%", left: "60%", delay: "1.7s", dur: "6.8s", opacity: 0.12 },
-  ];
+            {/* wordmark — centered */}
+            <div className="absolute inset-x-0 bottom-8 sm:bottom-10 flex justify-center">
+              <span className="font-[Inter] font-semibold tracking-[0.25em] uppercase text-white text-base sm:text-xl">
+                Urbankriti
+              </span>
+            </div>
+          </div>
 
-  return (
-    <div className="absolute inset-0 pointer-events-none">
-      {bubbles.map((b, i) => (
-        <span
-          key={i}
-          className="absolute rounded-full bg-[#B4894F] motion-reduce:animate-none animate-[bubble-float_ease-in-out_infinite]"
-          style={{
-            width: b.size,
-            height: b.size,
-            top: b.top,
-            left: b.left,
-            opacity: b.opacity,
-            animationDelay: b.delay,
-            animationDuration: b.dur,
-          }}
-        />
-      ))}
-    </div>
+          {/* Building */}
+          <img
+            ref={buildingRef}
+            src={buildingImg}
+            alt=""
+            className={`absolute z-30 left-[-38%] top-[55%] -translate-y-1/2
+              w-[80%] h-auto
+              pointer-events-none select-none
+              transition-all duration-[1100ms] ease-out
+              ${buildingVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-16"}`}
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -179,199 +194,49 @@ function ImageBubbles() {
 /*             About Us                */
 /* ---------------------------------- */
 export default function AboutUs() {
-  const [imgRef, imgVisible] = useReveal(0.25);
-  const [textRef, textVisible] = useReveal(0.25);
-  const [statsRef, statsVisible] = useReveal(0.4);
+  const [headingRef, headingVisible] = useReveal(0.3);
+  const [listRef, listVisible] = useReveal(0.2);
 
-  const paragraphs = [
-    "We are a privately held venture, founded and driven by professionals who believe great outcomes start with disciplined thinking.",
-    "Across every vertical we operate in, our focus stays the same — closing the gap between what people expect and what they actually experience.",
-    "Guided by transparency and an obsession with quality, we build products, spaces and partnerships that are made to last.",
-  ];
-
-  const stats = [
-    { value: "12+", label: "Years of trust" },
-    { value: "40+", label: "Projects delivered" },
-    { value: "4", label: "Business verticals" },
+  const points = [
+    "A Privately held Investment Venture, Founded & Driven by Professionals",
+    "Currently holding a consortium of Interlinked Group Companies, focused on the Real Estate sector",
+    'Building Products, Services and Processes that bridge "Expectation" vs "Current Reality" gap',
+    "Creating a Unified and Preferred platform for diverse and dynamic client requirements",
+    "Guided by Ethics & focused on exceptional Value Creation for stakeholders across our operations",
   ];
 
   return (
-    <section
-      id="about"
-      className="relative bg-[#FBF9F5] py-14 md:py-14 overflow-hidden"
-    >
-      <AmbientBackground />
-
-      {/* section label, centered at the top */}
-      <div className="relative flex justify-center mb-10 md:mb-10">
-        <span className="inline-flex items-center gap-3 font-[Inter] text-2xl tracking-[0.2em] uppercase 
-        font-semibold text-[#B4894F]">
-          <span className="w-8 h-px bg-[#B4894F]" />
-          About Us
-          <span className="w-8 h-px bg-[#B4894F]" />
-        </span>
-      </div>
-
-      <div className="relative max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-16 md:gap-24 items-center">
-        {/* ---------- Text side (now left) ---------- */}
-        <div
-          ref={textRef}
-          className={`order-2 md:order-1 transition-all duration-[1100ms] ease-out delay-150 ${
-            textVisible
-              ? "opacity-100 translate-x-0"
-              : "opacity-0 -translate-x-12"
-          }`}
-        >
-          <h2 className="font-[Playfair_Display] text-3xl md:text-4xl leading-[1.15] text-[#3A1E1E]">
-            Deciphering opportunities,
-            <br />
-            building lasting trust.
+    <>
+      <section id="about" className="relative bg-white py-14 md:py-18">
+        <div className="max-w-5xl mx-auto px-6 md:px-10">
+          <h2
+            ref={headingRef}
+            className={`font-sans font-medium text-[#14181F] leading-[1.1] tracking-tight
+              text-5xl sm:text-6xl md:text-7xl
+              transition-all duration-700 ease-out
+              ${headingVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+          >
+            Who we are?
           </h2>
 
-          <div className="mt-8 space-y-5">
-            {paragraphs.map((p, i) => (
+          <div ref={listRef} className="mt-10 md:mt-12 space-y-5 md:space-y-6">
+            {points.map((p, i) => (
               <p
                 key={i}
-                className={`font-[Inter] text-[#3a3f49] leading-relaxed transition-all duration-700
-                   ease-out text-lg text-justify${
-                  textVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
-                }`}
-                style={{ transitionDelay: `${300 + i * 150}ms` }}
+                className={`font-sans text-base sm:text-xl text-[#565D6B] leading-relaxed
+                  transition-all duration-700 ease-out
+                  ${listVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+                style={{ transitionDelay: `${i * 150}ms` }}
               >
-                {p}
+                · {p}
               </p>
             ))}
           </div>
-
-          {/* stats row */}
-          <div
-            ref={statsRef}
-            className="mt-14 grid grid-cols-3 gap-6 border-t border-[#14181F]/10 pt-4"
-          >
-            {stats.map((s, i) => (
-              <div
-                key={s.label}
-                className={`transition-all duration-700 ease-out ${
-                  statsVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
-                }`}
-                style={{ transitionDelay: `${i * 150}ms` }}
-              >
-                <p className="font-[Playfair_Display] text-3xl text-[#14181F]">
-                  {s.value}
-                </p>
-                <p className="font-[Inter] text-xs text-[#8A93A3] mt-1">
-                  {s.label}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
+      </section>
 
-        {/* ---------- Image side (now right) ---------- */}
-        <div
-          ref={imgRef}
-          className={`order-1 md:order-2 relative transition-all duration-[1100ms] ease-out ${
-            imgVisible
-              ? "opacity-100 translate-x-0"
-              : "opacity-0 translate-x-12"
-          }`}
-        >
-          {/* bubbles sit behind/around the image, spanning a bit beyond its box */}
-          <ImageBubbles />
-
-          {/* creative corner-bracket accents instead of a plain frame/ring —
-              two open "L" brackets that bounce a beat behind the photo */}
-          <svg
-            className={`absolute -top-6 -left-6 w-16 h-16 text-[#B4894F] motion-reduce:animate-none ${
-              imgVisible
-                ? "animate-[bounce-float_3.5s_ease-in-out_infinite]"
-                : ""
-            }`}
-            style={imgVisible ? { animationDelay: "0.3s" } : undefined}
-            viewBox="0 0 64 64"
-            fill="none"
-          >
-            <path
-              d="M2 22V6a4 4 0 0 1 4-4h16"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          <svg
-            className={`absolute -bottom-6 -right-6 w-16 h-16 text-[#B4894F] motion-reduce:animate-none ${
-              imgVisible
-                ? "animate-[bounce-float_3.5s_ease-in-out_infinite]"
-                : ""
-            }`}
-            style={imgVisible ? { animationDelay: "0.3s" } : undefined}
-            viewBox="0 0 64 64"
-            fill="none"
-          >
-            <path
-              d="M62 42v16a4 4 0 0 1-4 4H42"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          </svg>
-
-          {/* small solid accent dot, offset from the corner bracket */}
-          <span
-            className={`absolute -top-3 left-14 w-3 h-3 rounded-full bg-[#B4894F] motion-reduce:animate-none ${
-              imgVisible ? "animate-[bounce-float_3.5s_ease-in-out_infinite]" : ""
-            }`}
-          />
-
-          <div
-            className={`relative aspect-[4/3] rounded-[2rem] overflow-hidden shadow-[0_30px_80px_-20px_rgba(20,24,31,0.25)] motion-reduce:animate-none ${
-              imgVisible ? "animate-[bounce-float_3.5s_ease-in-out_infinite]" : ""
-            }`}
-          >
-            <img
-              src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop"
-              alt="Our team at work"
-              className="w-full h-full object-cover scale-[1.03] hover:scale-100 transition-transform duration-[1400ms] ease-out"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#101826]/30 via-transparent to-transparent" />
-          </div>
-        </div>
-      </div>
-
-      {/* Only raw @keyframes remain here — Tailwind utilities (animate-[...])
-          reference these by name above, but Tailwind itself can't author a
-          keyframe as a class without a config file, so this bit of plain CSS
-          is unavoidable in a config-less setup. */}
-      <style>{`
-        @keyframes drift {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(30px, -20px) scale(1.08); }
-        }
-        @keyframes drift-slow {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(-25px, 25px) scale(1.05); }
-        }
-        @keyframes drift-slower {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(20px, 30px) scale(1.1); }
-        }
-        @keyframes bounce-float {
-          0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-8px); }
-        }
-        @keyframes bubble-float {
-          0%   { transform: translate(0, 0) scale(1); }
-          25%  { transform: translate(6px, -14px) scale(1.06); }
-          50%  { transform: translate(-4px, -22px) scale(0.96); }
-          75%  { transform: translate(-8px, -8px) scale(1.03); }
-          100% { transform: translate(0, 0) scale(1); }
-        }
-      `}</style>
-    </section>
+      <CityFeatureSection />
+    </>
   );
 }
 
@@ -380,7 +245,7 @@ export default function AboutUs() {
 /* ---------------------------------- */
 export function AboutPageDemo() {
   return (
-    <div className="min-h-screen bg-[#FBF9F5]">
+    <div className="min-h-screen bg-white">
       <Navbar />
       <div className="pt-24">
         <AboutUs />
